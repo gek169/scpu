@@ -86,6 +86,9 @@ void add_macro(char* name, char* value){
 int main(int argc, char** argv){
 	FILE* f;
 	unsigned long len;
+	unsigned i;
+	char* q;
+	char* filedata;
 	if(argc < 2) return 1;
 
 	f = fopen(argv[1],"r");
@@ -94,9 +97,15 @@ int main(int argc, char** argv){
 	/*TODO: read assembly language program line-by-line and create macros.*/
 	M = calloc(0x10000,2) /*128k of shorts*/;
 
-	read_file_into_alloced_buffer(f,&len);
+	filedata = read_file_into_alloced_buffer(f,&len);
 
 	/*Read lines of file one at a time.*/
-	
+	for(i=0; i < 2; i++)
+	for(q = filedata; *q != '\0';){
+		/*Skip whitespace*/
+		while(*q == ' ' || *q == '\t' || *q == '\v') q++;
+		if(*q == '\0' || *q == '\r' || *q == '\n') continue;
+		/*We have now reached a keyword!TODO: Parse*/
+	}
 	return 0;
 }
