@@ -18,7 +18,7 @@ void scpu_run(it a, it b, it c, ut pc, ut stp, ut* M, it (*hook)(it,it,it,ut,ut,
 			case 2:	a = M[pc++]; break;
 			case 3:	b = M[pc++]; break;
 			case 4:	c = M[pc++]; break;
-			case 5:	pc = M[pc++]; break;	/*Also called "JMP"*/
+			case 5:	pc = M[pc]; break;	/*Also called "JMP"*/
 			case 6:	stp = M[pc++]; break;
 			/*Load from address into register*/
 			case 7:	a = M[M[pc++]]; break;
