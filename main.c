@@ -2,110 +2,40 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "scpu.h"
+#include "scpu2.h"
 #include <string.h>
 #include "stringutil.h"
 /*it (*hook)(it,it,it,ut,ut,ut*)*/
 
-it hfunc(it a, it b, it c, it pc, it stp, ut* M){
-	if(a == 0)
-		putchar(b);
-	if(a == 1)
-		return getchar();
-	return 0;
-}
 
 ut* M = NULL;
-
-typedef struct {
-	it value;
-	char name[64];
-} vardecl;
-
-typedef struct {
-	char name[64];
-	char value[65535];
-} macrodecl;
-
-
-#define MAX_VARS 1024
-#define MAX_MACROS 1024
-vardecl vars[MAX_VARS];
-unsigned nvars = 0;
-macrodecl macros[MAX_MACROS];
-unsigned nmacros = 0;
-
-unsigned get_var(char* name){
-	unsigned i = 0;
-	for(i=0; i < nvars; i++)
-	{
-		vars[i].name[63] = '\0';
-		if(strcmp(name, vars[i].name) == 0) return i;
-	}
-	return MAX_VARS;
+u8* filedata;
+u8 read_scpu(ut addr){
+	if(addr == 0x10001) {printf("Enter Character:\r\n");return getchar();}
+	else return M[addr & 0xffFF];
+}
+void write_scpu(ut addr, u8 val){
+	if(addr == 0x10001) putchar(val);
+	else
+	M[addr & 0xffFF] = val;
 }
 
-void add_var(char* name, it value){
-	unsigned v = get_var(name);
-	if(v != MAX_VARS){
-		vars[v].value = value;
-		return;
-	}
-	/**/
-	if(nvars == MAX_VARS) return;
-	strcpy(vars[nvars].name, name);
-	vars[nvars].value = value;
-	nvars++;
-	return;
-}
-
-unsigned get_macro(char* name){
-	unsigned i = 0;
-	for(i=0; i < nmacros; i++)
-	{
-		macros[i].name[63] = '\0';
-		if(strcmp(name, macros[i].name) == 0) return i;
-	}
-	return MAX_MACROS;
-}
-
-void add_macro(char* name, char* value){
-	unsigned v = get_macro(name);
-	if(v != MAX_MACROS){
-		strcpy((char*)macros[v].value, value);
-		return;
-	}
-	/**/
-	if(nmacros == MAX_MACROS) return;
-	strcpy((char*)macros[nmacros].name, name);
-	strcpy((char*)macros[v].value, value);
-	nmacros++;
-	return;
-}
 
 int main(int argc, char** argv){
 	FILE* f;
 	unsigned long len;
-	unsigned i;
-	char* q;
-	char* filedata;
 	if(argc < 2) return 1;
 
-	f = fopen(argv[1],"r");
+	f = fopen(argv[1],"rb");
 	if(!f) return 1;
 
-	/*TODO: read assembly language program line-by-line and create macros.*/
-	M = calloc(0x10000,2) /*128k of shorts*/;
-
+	/*TODO: read assembly language program line-by-line and create macros, instead of compiling a program.*/
+	M = calloc(0x10000,1) /*64k*/;
+	if(!M) return 1;
 	filedata = read_file_into_alloced_buffer(f,&len);
-
-	/*Read lines of file one at a time.*/
-	for(i=0; i < 2; i++)
-	for(q = filedata; *q != '\0';){
-		/*Skip whitespace*/
-		while(*q == ' ' || *q == '\t' || *q == '\v') q++;
-		if(*q == '\0' || *q == '\r' || *q == '\n') continue;
-		/*We have now reached a keyword!TODO: Parse*/
-	}
-	return 0;
+	if(len > 0x10000) memcpy(M, filedata, 0x10000);
+	else
+	memcpy(M, filedata, len);
+	printf("Starting system...\r\n");
+	run_scpu(0,0,0,0,0);
 }

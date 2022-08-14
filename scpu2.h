@@ -14,8 +14,8 @@ void run_scpu(ut a, ut b, ut c, ut stp, ut pc){
 	/*control insns*/
 	while(1){
 		switch(read_scpu(pc++)){
-			case 0: break;
-			default:case 255: return;
+			default:case 0: break;
+			case 255: return;
 
 			/*IMM LOADS=============================================*/
 			case 1: 
